@@ -30,6 +30,46 @@ echo "           Elegant Fedora 41 System Updater               "
 echo "=========================================================="
 echo -e "${NC}"
 
+# Function to display the man page
+show_help() {
+    echo "NAME
+       system_updater.sh - Fedora 41 Elegant System Updater
+
+SYNOPSIS
+       ./system_updater.sh [OPTIONS]
+
+DESCRIPTION
+       A beautifully crafted script to update and upgrade Fedora 41 with enhanced visuals, dynamic progress bars,
+       and meticulous logging. This script performs the following tasks:
+       - Refreshes repository data
+       - Updates system packages
+       - Upgrades system packages
+       - Cleans up unnecessary packages
+
+OPTIONS
+       -h, --help
+              Display this help message and exit.
+
+USAGE
+       Ensure the script has execute permissions:
+           chmod +x system_updater.sh
+
+       Run the script with:
+           ./system_updater.sh
+
+AUTHOR
+       Written by Jamal Al-Sarraf (Snake). Contributions are welcome.
+
+LICENSE
+       Released under the MIT License."
+}
+
+# Check for help option
+if [[ $1 == "-h" || $1 == "--help" ]]; then
+    show_help
+    exit 0
+fi
+
 # Function for logging
 log() {
     echo -e "[$(date +"%Y-%m-%d")] $1" | tee -a $LOGFILE
