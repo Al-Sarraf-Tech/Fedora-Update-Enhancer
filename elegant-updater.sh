@@ -33,10 +33,10 @@ echo -e "${NC}"
 # Function to display the man page
 show_help() {
     echo "NAME
-       system_updater.sh - Fedora 41 Elegant System Updater
+       elegant-updater.sh - Fedora 41 Elegant System Updater
 
 SYNOPSIS
-       ./system_updater.sh [OPTIONS]
+       ./elegant-updater.sh [OPTIONS]
 
 DESCRIPTION
        A beautifully crafted script to update and upgrade Fedora 41 with enhanced visuals, dynamic progress bars,
@@ -52,10 +52,10 @@ OPTIONS
 
 USAGE
        Ensure the script has execute permissions:
-           chmod +x system_updater.sh
+           chmod +x elegant-updater.sh
 
        Run the script with:
-           ./system_updater.sh
+           ./elegant-updater.sh
 
 AUTHOR
        Written by Jamal Al-Sarraf (Snake). Contributions are welcome.
