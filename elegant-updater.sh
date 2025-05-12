@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #==========================================================
-#          Fedora 41 Elegant System Updater
+#          Fedora 42 Elegant System Updater
 #==========================================================
 # Author: Jamal Al-Sarraf (Snake)
 # Description: A beautifully crafted script to update and
-#              upgrade Fedora 41 with enhanced visuals,
+#              upgrade Fedora 42 with enhanced visuals,
 #              dynamic progress bars, and meticulous logging.
 #==========================================================
 
@@ -26,53 +26,13 @@ NC='\033[0m' # No Color
 echo -e "${CYAN}"
 echo "=========================================================="
 echo "               [ S N A K E ]                              "
-echo "           Elegant Fedora 41 System Updater               "
+echo "           Elegant Fedora 42 System Updater               "
 echo "=========================================================="
 echo -e "${NC}"
 
-# Function to display the man page
-show_help() {
-    echo "NAME
-       elegant-updater.sh - Fedora 41 Elegant System Updater
-
-SYNOPSIS
-       ./elegant-updater.sh [OPTIONS]
-
-DESCRIPTION
-       A beautifully crafted script to update and upgrade Fedora 41 with enhanced visuals, dynamic progress bars,
-       and meticulous logging. This script performs the following tasks:
-       - Refreshes repository data
-       - Updates system packages
-       - Upgrades system packages
-       - Cleans up unnecessary packages
-
-OPTIONS
-       -h, --help
-              Display this help message and exit.
-
-USAGE
-       Ensure the script has execute permissions:
-           chmod +x elegant-updater.sh
-
-       Run the script with:
-           ./elegant-updater.sh
-
-AUTHOR
-       Written by Jamal Al-Sarraf (Snake). Contributions are welcome.
-
-LICENSE
-       Released under the MIT License."
-}
-
-# Check for help option
-if [[ $1 == "-h" || $1 == "--help" ]]; then
-    show_help
-    exit 0
-fi
-
 # Function for logging
 log() {
-    echo -e "[$(date +"%Y-%m-%d")] $1" | tee -a $LOGFILE
+    echo -e "[$(date +"%Y-%m-%d %H:%M:%S")] $1" | tee -a "$LOGFILE"
 }
 
 # Root permission check
@@ -87,14 +47,14 @@ progress_bar() {
     local msg="$2"
     echo -ne "${YELLOW}$msg...${NC}\n"
     {
-        eval "$cmd" >> $LOGFILE 2>&1
+        eval "$cmd" >> "$LOGFILE" 2>&1
     } &
     local pid=$!
     local delay=0.1
     local spinstr='|/-\'
     local temp
     echo -ne " "
-    while ps a | awk '{print $1}' | grep -q "$pid"; do
+    while ps -p "$pid" &>/dev/null; do
         temp="${spinstr#?}"
         printf " [%c]  " "$spinstr"
         spinstr=$temp${spinstr%"$temp"}
@@ -111,22 +71,42 @@ progress_bar() {
     fi
 }
 
-# Update and Upgrade Process
-log "${CYAN}Starting system update and upgrade on Fedora 41.${NC}"
+# Start Update Process
+log "${CYAN}Starting system update and upgrade on Fedora 42.${NC}"
+
+# Step 0: Ensure delta RPMs are enabled
+progress_bar "sed -i 's/^#*deltarpm=.*/deltarpm=1/' /etc/dnf/dnf.conf" "Ensuring delta RPMs are enabled"
 
 # Step 1: Refresh repository data
-progress_bar "dnf makecache -y" "Refreshing repository data"
+progress_bar "dnf5 makecache -y" "Refreshing repository data"
 
 # Step 2: System update
-progress_bar "dnf -y update" "Updating system packages"
+progress_bar "dnf5 update -y" "Updating system packages"
 
-# Step 3: System upgrade
-progress_bar "dnf -y upgrade" "Upgrading system packages"
+# Step 3: System upgrade (ensure all upgrades applied)
+progress_bar "dnf5 upgrade -y" "Upgrading system packages"
 
 # Step 4: Clean up unnecessary packages
-progress_bar "dnf -y autoremove && dnf clean all" "Cleaning up old packages"
+progress_bar "dnf5 autoremove -y && dnf5 clean all" "Cleaning up old packages"
+
+# Step 5: Flatpak updates (optional, include if using Flatpak)
+if command -v flatpak &>/dev/null; then
+    progress_bar "flatpak update -y" "Updating Flatpak applications"
+fi
 
 log "${GREEN}$SUCCESS_MESSAGE${NC}"
+
+# Check if reboot is required
+if [ -f /var/run/reboot-required ] || [ "$(rpm -q --last kernel | head -n 1 | grep -c $(uname -r))" -eq 0 ]; then
+    echo -e "${YELLOW}A system reboot is recommended to apply kernel updates.${NC}"
+    read -p "Do you want to reboot now? (y/n): " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        log "System is rebooting as per user confirmation."
+        reboot
+    else
+        log "Reboot skipped by user."
+    fi
+fi
 
 # Footer
 echo -e "${CYAN}"
