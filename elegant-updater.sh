@@ -1,116 +1,142 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# fedora42-autoupdate.sh — Simple unattended updater (dnf5 + delta RPMs)
+# No restart check, no log files.
+# Usage: sudo ./fedora42-autoupdate.sh
 
-#==========================================================
-#          Fedora 42 Elegant System Updater
-#==========================================================
-# Author: Jamal Al-Sarraf (Snake)
-# Description: A beautifully crafted script to update and
-#              upgrade Fedora 42 with enhanced visuals,
-#              dynamic progress bars, and meticulous logging.
-#==========================================================
+set -Eeuo pipefail
 
-# Constants
-LOGFILE="/var/log/system_update.log"
-DATE=$(date +"%Y-%m-%d")
-SUCCESS_MESSAGE="System update completed successfully."
-ERROR_MESSAGE="System update encountered an error."
-
-# Color Codes
-GREEN='\033[1;32m'
-CYAN='\033[1;36m'
-YELLOW='\033[1;33m'
-RED='\033[1;31m'
-NC='\033[0m' # No Color
-
-# ASCII Art Header
-echo -e "${CYAN}"
-echo "=========================================================="
-echo "               [ S N A K E ]                              "
-echo "           Elegant Fedora 42 System Updater               "
-echo "=========================================================="
-echo -e "${NC}"
-
-# Function for logging
-log() {
-    echo -e "[$(date +"%Y-%m-%d %H:%M:%S")] $1" | tee -a "$LOGFILE"
-}
-
-# Root permission check
-if [[ $EUID -ne 0 ]]; then
-    echo -e "${RED}Error: This script must be run as root.${NC}"
-    exit 1
+# ---------- Styling ----------
+if [[ -t 1 ]]; then
+  C_RESET="$(printf '\033[0m')"
+  C_DIM="$(printf '\033[2m')"
+  C_BOLD="$(printf '\033[1m')"
+  C_HL="$(printf '\033[1;36m')"      # cyan
+  C_OK="$(printf '\033[1;32m')"      # green
+  C_WARN="$(printf '\033[1;33m')"    # yellow
+  C_ERR="$(printf '\033[1;31m')"     # red
+  C_BLUE="$(printf '\033[34m')"
+else
+  C_RESET=""; C_DIM=""; C_BOLD=""; C_HL=""; C_OK=""; C_WARN=""; C_ERR=""; C_BLUE=""
 fi
 
-# Dynamic Progress Bar Function
-progress_bar() {
-    local cmd="$1"
-    local msg="$2"
-    echo -ne "${YELLOW}$msg...${NC}\n"
+hr()   { printf "%s\n" "${C_DIM}────────────────────────────────────────────────────────${C_RESET}"; }
+ttl()  { printf "%s\n" "${C_HL}==> $*${C_RESET}"; }
+ok()   { printf "%s\n" "${C_OK}✔${C_RESET} $*"; }
+warn() { printf "%s\n" "${C_WARN}▲${C_RESET} $*"; }
+err()  { printf "%s\n" "${C_ERR}✖${C_RESET} $*"; }
+note() { printf "%s\n" "${C_DIM}•${C_RESET} $*"; }
+
+# ---------- Tunables ----------
+DNF=${DNF:-/usr/bin/dnf5}
+# Prefer dnf5.conf on DNF5 hosts, otherwise fall back to legacy path.
+DNF_CONF=${DNF_CONF:-}
+if [[ -z "${DNF_CONF}" ]]; then
+  if [[ -f /etc/dnf/dnf5.conf ]]; then
+    DNF_CONF=/etc/dnf/dnf5.conf
+  else
+    DNF_CONF=/etc/dnf/dnf.conf
+  fi
+fi
+
+MAX_PARALLEL_DOWNLOADS=${MAX_PARALLEL_DOWNLOADS:-10}
+INSTALLONLY_LIMIT=${INSTALLONLY_LIMIT:-3}
+
+# ---------- Checks ----------
+[[ $EUID -eq 0 ]] || { err "Run as root (sudo)."; exit 1; }
+command -v "$DNF" >/dev/null || { err "dnf5 not found at $DNF"; exit 1; }
+
+# ---------- Header ----------
+# Leading \r ensures we start at column 0 even if a prior carriage return/progress line is active.
+printf "\r%s\n\n" "${C_BOLD}${C_BLUE}Fedora 42 — Auto Update${C_RESET}"
+note "Host: $(hostname -f 2>/dev/null || hostname)"
+note "Kernel: $(uname -r)"
+hr
+
+# ---------- dnf tuning ----------
+ttl "Tuning dnf5"
+conf="$DNF_CONF"
+[[ -e "$conf" ]] || { install -m 0644 -o root -g root /dev/null "$conf"; }
+
+ensure_kv() {
+  local key="$1" val="$2"
+  local tmp="${conf}.tmp.$$"
+
+  # Build a safe updated file to tmp, then mv atomically.
+  awk -v key="$key" -v val="$val" '
+    BEGIN{updated=0; inmain=0}
+    /^\[main\]/ { print; inmain=1; next }
     {
-        eval "$cmd" >> "$LOGFILE" 2>&1
-    } &
-    local pid=$!
-    local delay=0.1
-    local spinstr='|/-\'
-    local temp
-    echo -ne " "
-    while ps -p "$pid" &>/dev/null; do
-        temp="${spinstr#?}"
-        printf " [%c]  " "$spinstr"
-        spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        printf "\b\b\b\b\b\b"
-    done
-    wait $pid
-    if [ $? -eq 0 ]; then
-        echo -ne " [${GREEN}Done${NC}]\n"
-    else
-        echo -ne " [${RED}Failed${NC}]\n"
-        log "${RED}$ERROR_MESSAGE${NC}"
-        exit 1
-    fi
+      if (inmain && $0 ~ "^[[:space:]]*"key"[[:space:]]*=") {
+        print key"="val
+        # skip any existing line with this key
+        updated=1
+        # consume following line only if it would have been the old kv (already matched)
+        next
+      }
+      print
+    }
+    END{
+      if (!inmain) {
+        print "[main]"
+        inmain=1
+      }
+      if (!updated) {
+        print key"="val
+      }
+    }
+  ' "$conf" > "$tmp"
+
+  # Replace file preserving owner/mode if possible
+  # shellcheck disable=SC2015
+  install -m "$(stat -c '%a' "$conf" 2>/dev/null || echo 0644)" -o root -g root "$tmp" "$tmp" >/dev/null 2>&1 || true
+  mv -f "$tmp" "$conf"
 }
 
-# Start Update Process
-log "${CYAN}Starting system update and upgrade on Fedora 42.${NC}"
+# Common knobs; write both fastestmirror keys for cross-compat safety.
+ensure_kv deltarpm true
+ensure_kv fastestmirror true
+ensure_kv enable_fastestmirror true
+ensure_kv max_parallel_downloads "${MAX_PARALLEL_DOWNLOADS}"
+ensure_kv installonly_limit "${INSTALLONLY_LIMIT}"
+ok "Config updated at $conf"
+hr
 
-# Step 0: Ensure delta RPMs are enabled
-progress_bar "sed -i 's/^#*deltarpm=.*/deltarpm=1/' /etc/dnf/dnf.conf" "Ensuring delta RPMs are enabled"
+# ---------- Update ----------
+ttl "Refreshing metadata"
+# Clear expired metadata only
+"$DNF" clean expire-cache >/dev/null 2>&1 || true
 
-# Step 1: Refresh repository data
-progress_bar "dnf5 makecache -y" "Refreshing repository data"
+# Use makecache; if --timer exists (DNF4), use it, else plain makecache (DNF5).
+if "$DNF" makecache --help 2>&1 | grep -q -- ' --timer'; then
+  "$DNF" makecache --timer -q || true
+else
+  "$DNF" makecache -q || true
+fi
+ok "Metadata refreshed"
 
-# Step 2: System update
-progress_bar "dnf5 update -y" "Updating system packages"
+ttl "Applying updates"
+"$DNF" upgrade --refresh --best --allowerasing -y
+ok "Updates applied"
+hr
 
-# Step 3: System upgrade (ensure all upgrades applied)
-progress_bar "dnf5 upgrade -y" "Upgrading system packages"
+# ---------- Cleanup ----------
+ttl "Cleaning up"
+"$DNF" autoremove -y || true
 
-# Step 4: Clean up unnecessary packages
-progress_bar "dnf5 autoremove -y && dnf5 clean all" "Cleaning up old packages"
-
-# Step 5: Flatpak updates (optional, include if using Flatpak)
-if command -v flatpak &>/dev/null; then
-    progress_bar "flatpak update -y" "Updating Flatpak applications"
+# Remove old installonly packages (old kernels, etc.) in a DNF5-friendly way.
+# Try the DNF5 idiom first; fall back if needed.
+if "$DNF" repoquery --help 2>&1 | grep -q -- '--installonly'; then
+  if "$DNF" repoquery --installonly | grep -q .; then
+    "$DNF" remove installonly -y || true
+  fi
+else
+  if "$DNF" repoquery installonly | grep -q .; then
+    "$DNF" remove installonly -y || true
+  fi
 fi
 
-log "${GREEN}$SUCCESS_MESSAGE${NC}"
+"$DNF" clean all || true
+ok "Cleanup complete"
 
-# Check if reboot is required
-if [ -f /var/run/reboot-required ] || [ "$(rpm -q --last kernel | head -n 1 | grep -c $(uname -r))" -eq 0 ]; then
-    echo -e "${YELLOW}A system reboot is recommended to apply kernel updates.${NC}"
-    read -p "Do you want to reboot now? (y/n): " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        log "System is rebooting as per user confirmation."
-        reboot
-    else
-        log "Reboot skipped by user."
-    fi
-fi
-
-# Footer
-echo -e "${CYAN}"
-echo "=========================================================="
-echo "             Update and Upgrade Complete!                 "
-echo "=========================================================="
-echo -e "${NC}"
+hr
+ok "All done"
