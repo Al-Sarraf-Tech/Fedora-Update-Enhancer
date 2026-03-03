@@ -113,5 +113,5 @@ sudo MAX_PARALLEL_DOWNLOADS=20 PREFER_MIRRORS=1 ./elegant-updater.sh
 - Commands validated:
   - `bash -n elegant-updater.sh`
   - `sudo DNF=<mock> DNF_CONF=<tmp> REPO_DIR=<tmp> RUN_UPDATE_SWEEP=1 bash ./elegant-updater.sh`
-- CI/CD status: passing on latest `main` runs.
+- CI/CD status: all tests passed on `main` (`Regression CI (Batched)` run `22642586949`, `Regression and Security` run `22642586948`).
 - Security hygiene: PASS (no hardcoded secrets or private keys detected in tracked files).
