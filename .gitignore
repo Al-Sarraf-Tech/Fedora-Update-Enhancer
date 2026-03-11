@@ -1,0 +1,18 @@
+# Fedora-Update-Enhancer — local gitignore
+# Global secrets coverage: ~/.config/git/ignore
+
+# Runtime / test artifacts
+*.log
+*.tmp
+/tmp/
+
+# Shell history and editor state
+.history
+.vscode/
+.idea/
+.DS_Store
+
+# dnf / rpm artifacts
+*.rpm
+*.srpm
+repodata/
