@@ -14,11 +14,10 @@ if [[ -t 1 ]]; then
   C_OK="$(printf '\033[1;32m')"      # green
   C_WARN="$(printf '\033[1;33m')"    # yellow
   C_ERR="$(printf '\033[1;31m')"     # red
-  C_BLUE="$(printf '\033[34m')"
   C_PINK="$(printf '\033[1;35m')"    # magenta / pink
   C_NEON="$(printf '\033[1;96m')"    # bright cyan (neon)
 else
-  C_RESET=""; C_DIM=""; C_BOLD=""; C_HL=""; C_OK=""; C_WARN=""; C_ERR=""; C_BLUE=""
+  C_RESET=""; C_DIM=""; C_BOLD=""; C_HL=""; C_OK=""; C_WARN=""; C_ERR=""
   C_PINK=""; C_NEON=""
 fi
 
