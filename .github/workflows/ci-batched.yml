@@ -37,6 +37,18 @@ jobs:
         if: matrix.batch == 'syntax'
         run: bash .github/scripts/docker-runner.sh debian:bookworm-slim "bash -n elegant-updater.sh"
 
+      - name: shfmt format validation (advisory)
+        if: matrix.batch == 'syntax'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          if command -v shfmt >/dev/null 2>&1; then
+            echo "::notice::Running shfmt format check (non-blocking)"
+            shfmt -d -i 2 -ci -bn elegant-updater.sh
+          else
+            echo "::warning::shfmt not found on runner — skipping format check"
+          fi
+
       - name: Full updater regression with mocked dnf5
         if: matrix.batch == 'mock-upgrade'
         run: |

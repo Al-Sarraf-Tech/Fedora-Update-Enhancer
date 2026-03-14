@@ -2,6 +2,7 @@
 
 [![Regression CI](https://github.com/jalsarraf0/Fedora-Update-Enhancer/actions/workflows/regression-security.yml/badge.svg)](https://github.com/jalsarraf0/Fedora-Update-Enhancer/actions/workflows/regression-security.yml)
 [![Security CI](https://github.com/jalsarraf0/Fedora-Update-Enhancer/actions/workflows/ci-batched.yml/badge.svg)](https://github.com/jalsarraf0/Fedora-Update-Enhancer/actions/workflows/ci-batched.yml)
+[![SBOM](https://github.com/jalsarraf0/Fedora-Update-Enhancer/actions/workflows/sbom.yml/badge.svg)](https://github.com/jalsarraf0/Fedora-Update-Enhancer/actions/workflows/sbom.yml)
 
 High-performance unattended Fedora updater powered by `dnf5`.
 
