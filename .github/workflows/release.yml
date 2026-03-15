@@ -13,7 +13,7 @@ permissions:
 jobs:
   release:
     name: Publish release bundle
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, gentoo]
 
     steps:
       - name: Checkout
