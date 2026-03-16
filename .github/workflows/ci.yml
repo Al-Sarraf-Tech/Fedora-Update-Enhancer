@@ -101,14 +101,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Integration: syntax
+      - name: "Integration: syntax"
         shell: bash
         timeout-minutes: 30
-        run: echo 'Integration batch: syntax'
-      - name: Integration: mock-upgrade
+        run: |
+          echo 'Integration batch: syntax'
+      - name: "Integration: mock-upgrade"
         shell: bash
         timeout-minutes: 30
-        run: echo 'Integration batch: mock-upgrade'
+        run: |
+          echo 'Integration batch: mock-upgrade'
   release:
     name: Release
     runs-on: [self-hosted, unified-all]
