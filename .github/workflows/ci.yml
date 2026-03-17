@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Bash syntax check
         shell: bash
         timeout-minutes: 5
@@ -46,7 +46,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Cache /tmp/docker-runner
         uses: actions/cache@v4
         with:
@@ -65,7 +65,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Secrets scan (gitleaks)
         shell: bash
         timeout-minutes: 10
@@ -88,7 +88,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Generate SBOM (hand-crafted CycloneDX)
         shell: bash
         timeout-minutes: 5
@@ -100,7 +100,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Run integration tests (syntax)
         shell: bash
         timeout-minutes: 30
@@ -119,7 +119,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Generate checksums
         shell: bash
         timeout-minutes: 5
