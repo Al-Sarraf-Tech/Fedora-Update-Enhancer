@@ -2,6 +2,8 @@
 name: Fedora-Update-Enhancer CI
 on:
   push:
+    branches:
+      - main
     tags:
       - v*.*.*
       - v*
