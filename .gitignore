@@ -16,3 +16,7 @@
 *.rpm
 *.srpm
 repodata/
+CLAUDE.md
+.CLAUDE.md
+AGENTS.md
+.GEMINI.md
