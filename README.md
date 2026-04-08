@@ -1,6 +1,6 @@
 # Fedora Update Enhancer
 
-[![CI](https://github.com/jalsarraf0/Fedora-Update-Enhancer/actions/workflows/ci-shell.yml/badge.svg)](https://github.com/jalsarraf0/Fedora-Update-Enhancer/actions/workflows/ci-shell.yml)
+[![CI](https://github.com/Al-Sarraf-Tech/Fedora-Update-Enhancer/actions/workflows/ci-shell.yml/badge.svg)](https://github.com/Al-Sarraf-Tech/Fedora-Update-Enhancer/actions/workflows/ci-shell.yml)
 
 > CI runs on self-hosted runners managed by the [Haskell Orchestrator](https://github.com/Al-Sarraf-Tech/Haskell-Orchestrator). Pipeline includes a governance `repo-guard` job that verifies repository ownership before all other jobs run.
 
@@ -52,7 +52,7 @@ Not supported:
 
 - Fedora systems that only have DNF4/no `dnf5`
 - Non-Fedora Linux distributions
-- macOS and Windows
+- Windows
 
 ## Requirements
 
@@ -63,7 +63,7 @@ Not supported:
 ## Installation
 
 ```bash
-git clone https://github.com/jalsarraf0/Fedora-Update-Enhancer.git
+git clone https://github.com/Al-Sarraf-Tech/Fedora-Update-Enhancer.git
 cd Fedora-Update-Enhancer
 chmod +x elegant-updater.sh
 ```
