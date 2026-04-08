@@ -11,7 +11,7 @@ controls, and security practices applied to the Fedora-Update-Enhancer project.
 |---|---|---|
 | **Regression CI (Batched)** | Push to `main`, PRs | Syntax validation, shfmt format check, mock dnf5 integration test |
 | **Regression and Security** | Push (all branches), PRs | Multi-language regression detection, Gitleaks secret scanning |
-| **Release** | Tag push (`v*`) | Build release tarball, SHA-256 checksum, SLSA build provenance attestation |
+| **Release** | Tag push (`v*`) | Build release tarball, SHA-256 checksum |
 | **SBOM Generation** | Push to `main`, weekly schedule | CycloneDX SBOM generation with script hash |
 
 All workflows run on self-hosted runners (`[self-hosted, Linux, X64, docker]`) with
@@ -51,12 +51,11 @@ secrets, tokens, or private keys.
 
 ## 3. Supply-Chain Security
 
-### 3.1 SLSA Build Provenance (v2)
+### 3.1 SHA-256 Release Checksums
 
-Tagged releases use `actions/attest-build-provenance@v2` to generate SLSA v1.0
-provenance attestations. These attestations are attached to the release tarball
-and its SHA-256 checksum, providing a verifiable link between the source commit
-and the published artifact.
+Tagged releases compute a SHA-256 checksum for the release tarball. The checksum
+is published alongside the tarball on the GitHub Release page, allowing consumers
+to verify artifact integrity against the source commit.
 
 ### 3.2 SBOM Generation
 
@@ -82,8 +81,7 @@ Bash and `dnf5`.
 1. Developer tags a commit: `git tag v1.x.x && git push origin v1.x.x`
 2. Release workflow builds a tarball containing `elegant-updater.sh`, `README.md`, and `LICENSE`
 3. SHA-256 checksum is generated for the tarball
-4. SLSA build provenance attestation is created for both artifacts
-5. GitHub Release is published with all artifacts attached
+4. GitHub Release is published with tarball and checksum attached
 
 ---
 
@@ -92,7 +90,7 @@ Bash and `dnf5`.
 - Runners are self-hosted on controlled infrastructure
 - Docker-based isolation for syntax checks via `docker-runner.sh`
 - Workflow permissions follow least-privilege (`contents: read` for CI, scoped
-  `write` only for release and attestation)
+  `write` only for release)
 
 ---
 

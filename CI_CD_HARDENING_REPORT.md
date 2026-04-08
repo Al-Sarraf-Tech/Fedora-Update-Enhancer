@@ -62,7 +62,6 @@ users to understand the project's quality assurance posture.
 | Bash syntax check (`bash -n`) | Active | Runs in Docker container |
 | Mock dnf5 integration test | Active | Full script execution with mock binary |
 | Gitleaks secret scanning | Active | Every push and PR |
-| SLSA v2 build provenance | Active | On tagged releases |
 | SHA-256 checksums | Active | On release artifacts |
 | Concurrency controls | Active | All workflows have cancel-in-progress |
 | Least-privilege permissions | Active | `contents: read` for CI workflows |
