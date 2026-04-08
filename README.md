@@ -1,5 +1,8 @@
 # Fedora Update Enhancer
 
+[![CI](https://github.com/jalsarraf0/Fedora-Update-Enhancer/actions/workflows/ci-shell.yml/badge.svg)](https://github.com/jalsarraf0/Fedora-Update-Enhancer/actions/workflows/ci-shell.yml)
+
+> CI runs on self-hosted runners managed by the [Haskell Orchestrator](https://github.com/Al-Sarraf-Tech/Haskell-Orchestrator). Pipeline includes a governance `repo-guard` job that verifies repository ownership before all other jobs run.
 
 High-performance unattended Fedora updater powered by `dnf5`.
 
@@ -104,15 +107,19 @@ sudo MAX_PARALLEL_DOWNLOADS=20 PREFER_MIRRORS=1 ./elegant-updater.sh
 - No dedicated log file is written by default.
 - No reboot/restart check is performed.
 
+## CI/CD & Orchestration
+
+This project is governed by the [Haskell Orchestrator](https://github.com/Al-Sarraf-Tech/Haskell-Orchestrator) — a Haskell-based multi-agent CI/CD governance framework for pre-push validation, code quality enforcement, and release management across the Al-Sarraf-Tech organization.
+
 ## License
 
 [MIT](LICENSE)
 
-## Validation Status (2026-03-03)
+## Validation Status (2026-03-22)
 
 - Regression status: PASS
 - Commands validated:
   - `bash -n elegant-updater.sh`
   - `sudo DNF=<mock> DNF_CONF=<tmp> REPO_DIR=<tmp> RUN_UPDATE_SWEEP=1 bash ./elegant-updater.sh`
-- CI/CD status: all tests passed on `main` (`Regression CI (Batched)` run `22642586949`, `Regression and Security` run `22642586948`).
+- CI/CD status: all tests passed on `main`. Governance `repo-guard` job added to pipeline — verifies repository ownership before all other jobs run.
 - Security hygiene: PASS (no hardcoded secrets or private keys detected in tracked files).
