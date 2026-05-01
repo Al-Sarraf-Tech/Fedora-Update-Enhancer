@@ -1,0 +1,13 @@
+{
+  "schema": "fue-perf-bench/v1",
+  "ts": "2026-05-01T17:12:51Z",
+  "host": "amarillo",
+  "fedora_version": "44",
+  "bash_version": "5.3.9(1)-release",
+  "runs": 20,
+  "results": {
+    "metadata-refresh": {"runs": 20, "min_ms": 8, "p50_ms": 9, "p95_ms": 9, "p99_ms": 10, "max_ms": 10},
+    "full-run": {"runs": 20, "min_ms": 221, "p50_ms": 229, "p95_ms": 240, "p99_ms": 249, "max_ms": 249},
+    "sizing-decision": {"runs": 20, "min_ms": 9, "p50_ms": 10, "p95_ms": 10, "p99_ms": 11, "max_ms": 11}
+  }
+}
