@@ -17,3 +17,7 @@
 *.srpm
 repodata/
 CLAUDE.md
+
+# Generated artifacts
+dist/
+artifacts/
