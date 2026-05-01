@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Mock dnf5 for integration tests. Records args, returns canned responses.
+log_file="${MOCK_DNF_LOG:-/tmp/mock-dnf.log}"
+{
+  printf '[%s] dnf5 %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*"
+} >> "$log_file"
+
+case "$1" in
+  --version)
+    echo "dnf5 0.0.0-mock"
+    echo "libdnf5 version 0.0.0-mock"
+    exit 0
+    ;;
+  makecache)
+    if [[ "$2" == "--help" || "$2" == "-h" ]]; then
+      echo "Usage: dnf5 makecache [OPTIONS]"
+      echo "  --timer    Run as a timer"
+      exit 0
+    fi
+    echo "Mock: makecache complete"
+    exit 0
+    ;;
+  clean)
+    echo "Mock: clean $2"
+    exit 0
+    ;;
+  upgrade|update)
+    echo "Mock: $1 transaction"
+    echo "Nothing to do."
+    exit 0
+    ;;
+  autoremove)
+    echo "Mock: nothing to remove"
+    exit 0
+    ;;
+  remove)
+    echo "Mock: remove $2"
+    exit 0
+    ;;
+  repoquery)
+    if [[ "$2" == "--help" || "$2" == "-h" ]]; then
+      echo "Usage: dnf5 repoquery [OPTIONS]"
+      echo "  --installonly    Show installonly packages"
+      exit 0
+    fi
+    # Empty installonly list
+    exit 0
+    ;;
+  history)
+    if [[ "$2" == "list" ]]; then
+      cat <<'EOF'
+ID  | Date        | Action     | Altered | User
+----|-------------|------------|---------|------
+42  | 2026-04-30  | upgrade    | 12      | root
+EOF
+    fi
+    exit 0
+    ;;
+  needs-restarting)
+    if [[ "$2" == "--reboothint" ]]; then
+      exit 0  # 0 = no reboot needed
+    fi
+    exit 0
+    ;;
+  *)
+    exit 0
+    ;;
+esac

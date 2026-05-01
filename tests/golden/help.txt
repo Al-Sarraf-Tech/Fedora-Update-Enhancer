@@ -1,0 +1,19 @@
+elegant-updater.sh — High-performance unattended Fedora updater.
+Modular S+ tier rewrite. See docs/adr/ for design decisions.
+
+Usage: sudo elegant-updater.sh [flags]
+       sudo update                     (when installed as /usr/local/bin/update)
+
+Flags:
+  --version          Print version and exit
+  --help             Print usage and exit
+  --dry-run          Show what would be done; do not modify the system
+  --json             Emit logs as line-delimited JSON
+  --debug            Set log level to debug
+  --quiet            Set log level to warn
+  --no-banner        Suppress the header banner
+  --no-journald      Disable journald logging
+  --audit            Run the S+ audit and exit
+  --uninstall        Remove /usr/local/bin/update and exit
+
+All flags are also settable via environment variables (see docs/CONFIGURATION.md).
