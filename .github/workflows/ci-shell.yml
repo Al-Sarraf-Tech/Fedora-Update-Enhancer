@@ -96,18 +96,29 @@ jobs:
         timeout-minutes: 5
         run: find . -name '*.sh' -type f | xargs shfmt -d
   sbom:
-    name: SBOM
+    name: SBOM (CycloneDX)
     runs-on: [self-hosted, shell-slim]
     needs: [repo-guard, test]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
     timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Generate SBOM (hand-crafted CycloneDX)
+      - name: Generate CycloneDX SBOM
         shell: bash
         timeout-minutes: 5
-        run: echo 'Hand-crafted SBOM — see workflow for inline CycloneDX JSON'
+        run: |
+          mkdir -p dist
+          scripts/sbom.sh
+          jq -e '.bomFormat == "CycloneDX"' dist/sbom-*.json > /dev/null
+          ls -la dist/
+      - name: Upload SBOM artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: dist/sbom-*.json
+          retention-days: 90
   integration:
     name: Integration
     runs-on: [self-hosted, shell-slim]
@@ -126,6 +137,42 @@ jobs:
         timeout-minutes: 30
         run: |
           echo 'Integration batch: mock-upgrade'
+  perf-bench:
+    name: Perf bench (15% p99 regression gate)
+    runs-on: [self-hosted, shell-slim]
+    needs: [repo-guard, lint]
+    timeout-minutes: 15
+    env:
+      PERF_BENCH_RUNS: "20"
+      PERF_BENCH_REGRESSION_PCT: "15"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Bench current tree
+        shell: bash
+        timeout-minutes: 10
+        run: |
+          mkdir -p artifacts
+          scripts/perf-bench.sh > artifacts/current-perf.json
+          cat artifacts/current-perf.json
+      - name: Compare against baseline (gate)
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          if [[ ! -f tests/baseline-perf.json ]]; then
+            echo "::warning::tests/baseline-perf.json missing - bench is recorded but not gated."
+            exit 0
+          fi
+          scripts/perf-bench.sh compare tests/baseline-perf.json artifacts/current-perf.json
+      - name: Upload bench artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        env:
+          SHA: ${{ github.sha }}
+        with:
+          name: perf-bench-${{ github.sha }}
+          path: artifacts/current-perf.json
+          retention-days: 30
   release:
     name: Release
     runs-on: [self-hosted, shell-slim]
