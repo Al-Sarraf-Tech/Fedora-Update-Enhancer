@@ -62,13 +62,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Cache /tmp/docker-runner
-        uses: actions/cache@v4
-        with:
-          key: ${{ runner.os }}-docker-runner-${{ github.sha }}
-          path: /tmp/docker-runner
-          restore-keys: ${{ runner.os }}-docker-runner-
-
       - name: Validate scripts
         shell: bash
         timeout-minutes: 1
@@ -84,7 +77,7 @@ jobs:
       - name: Secrets scan (gitleaks)
         shell: bash
         timeout-minutes: 10
-        run: gitleaks detect --source=. --no-banner --exit-code=1
+        run: gitleaks detect --source=. --no-banner --redact --exit-code=1
       - name: ShellCheck
         shell: bash
         continue-on-error: true

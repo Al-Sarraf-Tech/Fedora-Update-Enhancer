@@ -13,6 +13,6 @@ on:
 
 jobs:
   orchestrator:
-    uses: Al-Sarraf-Tech/Haskell-Orchestrator/.github/workflows/orchestrator-scan.yml@v4.0.0
+    uses: Al-Sarraf-Tech/Haskell-Orchestrator/.github/workflows/orchestrator-scan.yml@d104eed4dbf9d72d1bfcef3f4c9b73bf6b2f9724 # orchestrator-scan uci fix
     with:
       fail-on: error
